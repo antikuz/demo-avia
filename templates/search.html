@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+
+<html>
+   <head>
+         <meta charset="UTF-8">
+         <link rel="stylesheet" href="/static/style.css">
+         <script type="text/javascript" src="/static/script.js"></script>
+   </head>
+   <body>
+        {{template "header"}}
+        <ul>
+        {{range $line := .}}
+            <li>
+                {{$line}}
+            </li>
+        {{end}}
+        </ul>
+   </body>
+</html>
