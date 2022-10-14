@@ -2,15 +2,29 @@
     <form action="/search" method="post" class="search_form">
         <ul>
             <li>
-                <input name="departure" placeholder="Откуда" list="cities" oninput="completeDataList(event, 'cities')" onfocus="" onsearch="ClearDataList('cities')" autocomplete=off required>
-                <input name="arrival" placeholder="Куда" list="cities2" oninput="completeDataList(event, 'cities2')" onfocus="" onsearch="ClearDataList('cities2')" autocomplete=off required>
-                <input id="date" name="date" placeholder="Когда" type="date" required>
+                <input name="departure" placeholder="Откуда" list="cities" oninput="completeDataList(event, 'cities')" onfocus="" onsearch="ClearDataList('cities')" autocomplete=off value="{{if .departure}}{{ index .departure 0 }}{{end}}" required>
+                <input name="arrival" placeholder="Куда" list="cities2" oninput="completeDataList(event, 'cities2')" onfocus="" onsearch="ClearDataList('cities2')" autocomplete=off value="{{if .arrival}}{{ index .arrival 0 }}{{end}}" required>
+                <input id="date" name="date" placeholder="Когда" type="date" value="{{if .date}}{{ index .date 0 }}{{end}}" required>
                 <label for="passengers_count">Пассажиры</label>
-                <input id="passengers_count" type="number" value="1" min="1" max="9">
-                <input type="radio" id="class" name="fav_language" value="Econom" checked>
-                <label for="html">Econom</label>
-                <input type="radio" id="class" name="fav_language" value="Business">
-                <label for="html">Business</label>
+                <input type="number" id="passengers_count" name="passengers_count" value="{{if .passengers_count}}{{ index .passengers_count 0 }}{{else}}1{{end}}" min="1" max="9">
+                {{ if and (.class ) (eq (index .class 0) "Business") }}
+                    <input type="radio" id="class" name="class" value="Econom">
+                    <label for="html">Эконом</label>
+                    <input type="radio" id="class" name="class" value="Business" checked>
+                    <label for="html">Бизнес</label>
+                {{ else }}
+                    <input type="radio" id="class" name="class" value="Econom" checked>
+                    <label for="html">Эконом</label>
+                    <input type="radio" id="class" name="class" value="Business">
+                    <label for="html">Бизнес</label>
+                {{ end }}
+                {{ if .baggage }}
+                    <input type="checkbox" id="baggage" name="baggage" checked>
+                    <label for="baggage">Багаж</label>
+                {{ else }}
+                    <input type="checkbox" id="baggage" name="baggage">
+                    <label for="baggage">Багаж</label>
+                {{ end }}
                 <button class="submit" type="submit">Найти билеты</button>
             </li>
         </ul>

@@ -35,11 +35,12 @@ func main() {
 		if r.Method == "POST" {
 			r.ParseForm()
 			fmt.Println(r.PostForm)
-			result := []string{
+			postFormValues := r.PostForm
+			postFormValues["result"] = []string{
 				"first line",
 				"second line",
 			}
-			if err := templates.ExecuteTemplate(w, "search.html", result); err != nil {
+			if err := templates.ExecuteTemplate(w, "search.html", postFormValues); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 		}

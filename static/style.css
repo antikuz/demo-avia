@@ -34,7 +34,7 @@ body {font: 14px/21px "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", san
     width:60px;
     display: inline-block;
 }
-.search_form input#class {
+.search_form input#class, .search_form input#baggage {
     height:20px;
     width:20px;
 }
