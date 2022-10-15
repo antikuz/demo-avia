@@ -1,0 +1,1 @@
+CREATE INDEX ticket_flights_flight_id_idx ON ticket_flights (flight_id); 
