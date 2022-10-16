@@ -1,19 +1,32 @@
 <!DOCTYPE html>
 
 <html>
-   <head>
-         <meta charset="UTF-8">
-         <link rel="stylesheet" href="/static/style.css">
-         <script type="text/javascript" src="/static/script.js"></script>
-   </head>
+{{template "head"}}
    <body>
         {{template "header" .}}
-        <ul>
-        {{range $line := .result}}
-            <li>
-                {{$line}}
-            </li>
+        <br>
+        {{range $line := .SearchResults}}
+        <a href="/buy-ticket/.{{ $line.FlightID }}" style="color:inherit">
+            <div class="div-table">
+                <div class="div-table-row">
+                    <div class="div-table-col">{{ $line.DepartureDate.Format "03:04" }}</div>
+                    <div class="div-table-col">&nbsp;</div>
+                    <div class="div-table-col">{{ $line.ArrivalDate.Format "03:04" }}</div>
+                </div>
+                <div class="div-table-row">
+                    <div class="div-table-col">{{ $line.DepartureCity }}</div>
+                    <div class="div-table-col">Время в полете:{{ $line.FlyDuration }}</div>
+                    <div class="div-table-col">{{ $line.ArrivalCity }}</div>
+                </div>
+                <div class="div-table-row">
+                    <div class="div-table-col">{{ $line.DepartureDate.Format "2006-01-02" }}</div>
+                    <div class="div-table-col">&nbsp;</div>
+                    <div class="div-table-col">{{ $line.ArrivalDate.Format "2006-01-02" }}</div>
+                </div>
+
+            </div>
+        </a>
+        <br>
         {{end}}
-        </ul>
    </body>
 </html>

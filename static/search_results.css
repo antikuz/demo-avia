@@ -1,0 +1,22 @@
+.div-table {
+    display: table;         
+    width: auto;                  
+    border-spacing: 5px;
+    border: 1px solid #777777;
+    border-radius: 5px;
+}
+.div-table-row {
+    display: table-row;
+    width: auto;
+    clear: both;
+}
+.div-table-col {
+    float: left;
+    display: table-column;         
+    width: 200px;         
+}
+
+#div-table a:link { color: #70DB93; }
+#div-table a:visited { color: #70DB93; }
+#div-table a:hover { color: #70DB93; }
+#div-table a:active { color: #70DB93; }
