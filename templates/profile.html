@@ -1,8 +1,30 @@
 <!DOCTYPE html>
-
 <html>
 {{template "head"}}
    <body>
-    Hello, user {{ . }}
+      Ваши предстоящие полеты
+      {{range $line := .}}
+        <a href="/edit/{{ $line.FlightID }}" style="color:inherit">
+            <div class="div-table">
+                <div class="div-table-row">
+                    <div class="div-table-col">&nbsp;</div>
+                    <div class="div-table-col">&nbsp;</div>
+                    <div class="div-table-col">&nbsp;</div>
+                </div>
+                <div class="div-table-row">
+                    <div class="div-table-col">{{ $line.DepartureDate.Format "2006-01-02" }}</div>
+                    <div class="div-table-col">{{ $line.DepartureCity }}</div>
+                    <div class="div-table-col">{{ $line.ArrivalCity }}</div>
+                </div>
+                <div class="div-table-row">
+                    <div class="div-table-col">&nbsp;</div>
+                    <div class="div-table-col">&nbsp;</div>
+                    <div class="div-table-col">&nbsp;</div>
+                </div>
+            </div>
+        </a>
+        <br>
+        {{end}}
+        </a>
    </body>
 </html>

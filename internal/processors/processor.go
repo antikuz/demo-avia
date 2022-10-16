@@ -47,3 +47,7 @@ func (s *StorageProcessor) GetUser(username string) models.User {
 	}
 	return users[0]
 }
+
+func (s *StorageProcessor) GetUserFlights(username string) []models.UserFlights {
+	return s.storage.GetUserFlights(username)
+}

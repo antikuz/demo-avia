@@ -13,33 +13,38 @@ import (
 )
 
 const (
-	rootURL = "/"
-	searchURL = "/search"
-	buyURL = "/buy/:id"
-	signinURL = "/signin"
+	rootURL        = "/"
+	searchURL      = "/search"
+	buyURL         = "/buy/:id"
+	signinURL      = "/signin"
 	userProfileURL = "/profile"
-	userURL = "/users/:uuid"
+	userURL        = "/users/:uuid"
 )
 
 type handler struct {
 	templates *template.Template
 	processor *processors.StorageProcessor
-	sessions map[string]*models.Session
-	logger *logging.Logger
+	sessions  map[string]*models.Session
+	logger    *logging.Logger
 }
 
 func NewHandler(templates *template.Template, processor *processors.StorageProcessor, sessions map[string]*models.Session, logger *logging.Logger) *handler {
 	return &handler{
 		templates: templates,
-		logger: logger,
-		sessions: sessions,
+		logger:    logger,
+		sessions:  sessions,
 		processor: processor,
 	}
 }
 
 func (h *handler) isAuthorized(w http.ResponseWriter, r *http.Request) bool {
-	_, err := r.Cookie("session_token")
-	return err == nil
+	token, err := r.Cookie("session_token")
+	_, ok := h.sessions[token.Value]
+	if err != nil || !ok {
+		return false
+	}
+
+	return true
 }
 
 func (h *handler) getUser(r *http.Request) string {
@@ -69,7 +74,7 @@ func (h *handler) GetFlights(w http.ResponseWriter, r *http.Request, params http
 	r.ParseForm()
 	postFormValues := r.PostForm
 	result := models.SearchResult{
-		SearchValues: postFormValues,
+		SearchValues:  postFormValues,
 		SearchResults: h.processor.List(postFormValues),
 	}
 	if err := h.templates.ExecuteTemplate(w, "search.html", result); err != nil {
@@ -80,16 +85,17 @@ func (h *handler) GetFlights(w http.ResponseWriter, r *http.Request, params http
 func (h *handler) BuyTicket(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	if !h.isAuthorized(w, r) {
 		http.Redirect(w, r, "/signin", http.StatusSeeOther)
-	}
-	r.ParseForm()
-	postFormValues := r.PostForm
-	id := params.ByName("id")
-	result := models.BuyFlightID{
-		SearchValues: postFormValues,
-		SearchResults: h.processor.GetFlight(id),
-	}
-	if err := h.templates.ExecuteTemplate(w, "buy-ticket.html", result); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	} else {
+		r.ParseForm()
+		postFormValues := r.PostForm
+		id := params.ByName("id")
+		result := models.BuyFlightID{
+			SearchValues:  postFormValues,
+			SearchResults: h.processor.GetFlight(id),
+		}
+		if err := h.templates.ExecuteTemplate(w, "buy-ticket.html", result); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	}
 }
 
@@ -121,7 +127,7 @@ func (h *handler) SignIn(w http.ResponseWriter, r *http.Request, params httprout
 			Expires: expiresAt,
 		})
 
-		http.Redirect(w ,r, "/profile", http.StatusSeeOther)
+		http.Redirect(w, r, "/profile", http.StatusSeeOther)
 	}
 
 }
@@ -129,10 +135,11 @@ func (h *handler) SignIn(w http.ResponseWriter, r *http.Request, params httprout
 func (h *handler) UserProfile(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	if !h.isAuthorized(w, r) {
 		http.Redirect(w, r, "/signin", http.StatusSeeOther)
-	}
-
-	user := h.getUser(r)
-	if err := h.templates.ExecuteTemplate(w, "profile.html", user); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	} else {
+		user := h.getUser(r)
+		flights := h.processor.GetUserFlights(user)
+		if err := h.templates.ExecuteTemplate(w, "profile.html", flights); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	}
 }

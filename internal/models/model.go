@@ -15,6 +15,13 @@ type BuyFlightID struct {
 	SearchResults FlightsV
 }
 
+type UserFlights struct {
+	FlightID int `db:"flight_id"`
+	DepartureCity  string `db:"departure"`
+	ArrivalCity string `db:"arrival"`
+	DepartureDate time.Time `db:"scheduled_departure"`
+}
+
 type Session struct {
 	Username string
 	Expiry   time.Time

@@ -53,6 +53,27 @@ func (storage *Storage) GetUser(username string) []models.User  {
 	return result
 }
 
+func (storage *Storage) GetUserFlights(username string) []models.UserFlights {
+	query := fmt.Sprintf(`
+	SELECT	f.scheduled_departure,
+			f.departure_city || ' (' || f.departure_airport || ')' AS departure,
+			f.arrival_city || ' (' || f.arrival_airport || ')' AS arrival,
+			tf.flight_id
+	FROM ticket_flights tf
+	JOIN tickets t ON t.ticket_no = tf.ticket_no
+	JOIN users u ON t.passenger_id = u.passenger_id
+	JOIN flights_v f ON tf.flight_id = f.flight_id
+	WHERE    u.username = '%s'
+	ORDER BY f.scheduled_departure;`, username)
+	var result []models.UserFlights
+	storage.logger.Debugf("%+v", result)
+	err := pgxscan.Select(context.Background(), storage.databasePool, &result, query)
+	if err != nil {
+		storage.logger.Errorf("Failed to get users, due to err: %v\n", err)
+	}
+	return result
+}
+
 func (storage *Storage) List(departure_city string, arrival_city string, dateFrom string, dateTo string, passengersCount string, class string) []models.FlightsV {
 	query := fmt.Sprintf(`
 	SELECT flight_id, 
