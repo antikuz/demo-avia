@@ -6,7 +6,7 @@
         {{template "header" .}}
         <br>
         {{range $line := .SearchResults}}
-        <a href="/buy-ticket/.{{ $line.FlightID }}" style="color:inherit">
+        <a href="/buy/{{ $line.FlightID }}" style="color:inherit">
             <div class="div-table">
                 <div class="div-table-row">
                     <div class="div-table-col">{{ $line.DepartureDate.Format "03:04" }}</div>

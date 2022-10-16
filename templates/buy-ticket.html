@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<html>
+{{template "head"}}
+   <body>
+        {{template "header" .}}
+        <br>
+        <a href="/buy/{{ .SearchResults.FlightID }}" style="color:inherit">
+            <div class="div-table">
+                <div class="div-table-row">
+                    <div class="div-table-col">{{ .SearchResults.DepartureDate.Format "03:04" }}</div>
+                    <div class="div-table-col">&nbsp;</div>
+                    <div class="div-table-col">{{ .SearchResults.ArrivalDate.Format "03:04" }}</div>
+                </div>
+                <div class="div-table-row">
+                    <div class="div-table-col">{{ .SearchResults.DepartureCity }}</div>
+                    <div class="div-table-col">Время в полете:{{ .SearchResults.FlyDuration }}</div>
+                    <div class="div-table-col">{{ .SearchResults.ArrivalCity }}</div>
+                </div>
+                <div class="div-table-row">
+                    <div class="div-table-col">{{ .SearchResults.DepartureDate.Format "2006-01-02" }}</div>
+                    <div class="div-table-col">&nbsp;</div>
+                    <div class="div-table-col">{{ .SearchResults.ArrivalDate.Format "2006-01-02" }}</div>
+                </div>
+            </div>
+        </a>
+        <br>
+        <label for="name">Фамилия имя</label>
+        <input id="name" name="name" required>
+        <label for="passport">Паспортные данные</label>
+        <input id="passport" name="passport" required>
+   </body>
+</html>

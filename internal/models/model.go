@@ -10,6 +10,11 @@ type SearchResult struct {
 	SearchResults []FlightsV
 }
 
+type BuyFlightID struct {
+	SearchValues url.Values
+	SearchResults FlightsV
+}
+
 type FlightsV struct {
 	FlightID int `db:"flight_id"`
 	DepartureCity  string `db:"departure_city"`
@@ -18,3 +23,4 @@ type FlightsV struct {
 	ArrivalDate time.Time `db:"scheduled_arrival_local"`
 	FlyDuration time.Duration `db:"scheduled_duration"`
 }
+

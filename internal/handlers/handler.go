@@ -13,7 +13,7 @@ import (
 const (
 	rootURL = "/"
 	searchURL = "/search"
-	usersURL = "/users"
+	buyURL = "/buy/:id"
 	userURL = "/users/:uuid"
 )
 
@@ -26,12 +26,15 @@ type handler struct {
 
 func NewHandler(templates *template.Template, processor *processors.StorageProcessor, logger *logging.Logger) *handler {
 	return &handler{
+		templates: templates,
 		logger: logger,
+		processor: processor,
 	}
 }
 
 func (h *handler) Register(router *httprouter.Router) {
 	router.GET(rootURL, h.GetMain)
+	router.GET(buyURL, h.BuyTicket)
 	router.POST(searchURL, h.GetFlights)
 }
 
@@ -53,3 +56,15 @@ func (h *handler) GetFlights(w http.ResponseWriter, r *http.Request, params http
 	}
 }
 
+func (h *handler) BuyTicket(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	r.ParseForm()
+	postFormValues := r.PostForm
+	id := params.ByName("id")
+	result := models.BuyFlightID{
+		SearchValues: postFormValues,
+		SearchResults: h.processor.GetFlight(id),
+	}
+	if err := h.templates.ExecuteTemplate(w, "buy-ticket.html", result); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}

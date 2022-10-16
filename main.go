@@ -6,7 +6,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-
 	"path/filepath"
 
 	"github.com/antikuz/demo-avia/internal/db"
@@ -23,17 +22,17 @@ func main() {
 	
 	// For testing purpose leave cred here
 	user := "postgres"
-	password := "postgres"
+	password := "chunga"
 	host := "localhost"
 	port := "5432"
 	dbname := "demo"
 	
 	connectstring := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", user, password, host, port, dbname)
-	server, err := pgxpool.Connect(ctx, connectstring)
+	db_storage, err := pgxpool.Connect(ctx, connectstring)
 	if err != nil {
 		logger.Fatalln(err)
 	}
-	storage := db.NewStorage(server, logger)
+	storage := db.NewStorage(db_storage, logger)
 	processor := processors.NewStorageProcessor(storage, logger)
 
 	templatesList, err := filepath.Glob("templates/*.html")
@@ -44,10 +43,9 @@ func main() {
 	templates := template.Must(template.ParseFiles(templatesList...))
 	handler := handlers.NewHandler(templates, processor, logger)
 	router := httprouter.New()
-	router.ServeFiles("/static/", http.Dir("static"))
+	router.ServeFiles("/static/*filepath", http.Dir("static"))
 	handler.Register(router)
 
 	fmt.Println("Listen http://localhost:8081")
-	log.Fatal(http.ListenAndServe(":8081", nil))
-	
+	log.Fatal(http.ListenAndServe(":8081", router))
 }
