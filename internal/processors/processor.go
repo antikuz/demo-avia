@@ -34,6 +34,14 @@ func (s *StorageProcessor) List(postFormValues url.Values) []models.FlightsV {
 	return s.storage.List(departure_city, arrival_city, dateFrom.Format("2006-01-02"), dateTo.Format("2006-01-02"))
 }
 
-func (s *StorageProcessor) GetFlight(FlightID string) models.FlightsV {
-	return s.storage.GetFlight(FlightID)
+func (s *StorageProcessor) GetFlight(flightID string) models.FlightsV {
+	return s.storage.GetFlight(flightID)
+}
+
+func (s *StorageProcessor) GetUser(username string) models.User {
+	users := s.storage.GetUser(username)
+	if len(users) != 1 {
+		return models.User{}
+	}
+	return users[0]
 }

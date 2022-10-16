@@ -21,11 +21,6 @@ const (
 	userURL = "/users/:uuid"
 )
 
-var users = map[string]string{
-	"1": "2",
-	"user2": "password2",
-}
-
 type handler struct {
 	templates *template.Template
 	processor *processors.StorageProcessor
@@ -106,9 +101,8 @@ func (h *handler) SignIn(w http.ResponseWriter, r *http.Request, params httprout
 	} else {
 		r.ParseForm()
 		creds := r.PostForm
-
-		expectedPassword, ok := users[creds["username"][0]]
-		if !ok || expectedPassword != creds["password"][0] {
+		user := h.processor.GetUser(creds["username"][0])
+		if user.Password == "" || user.Password != creds["password"][0] {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}

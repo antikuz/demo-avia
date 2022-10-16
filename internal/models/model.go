@@ -24,6 +24,11 @@ func (s Session) IsExpired() bool {
 	return s.Expiry.Before(time.Now())
 }
 
+type User struct {
+	Username string
+	Password string
+}
+
 type FlightsV struct {
 	FlightID int `db:"flight_id"`
 	DepartureCity  string `db:"departure_city"`

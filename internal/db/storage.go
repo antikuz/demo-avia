@@ -35,12 +35,23 @@ func (storage *Storage) GetFlight(flightID string) models.FlightsV  {
 	var result []models.FlightsV
 	err := pgxscan.Select(context.Background(), storage.databasePool, &result, query)
 	if err != nil {
-		storage.logger.Errorf("Failed to list metrics, due to err: %v\n", err)
+		storage.logger.Errorf("Failed to get flight, due to err: %v\n", err)
 	}
 	return result[0]
 }
 
-
+func (storage *Storage) GetUser(username string) []models.User  {
+	query := fmt.Sprintf(`
+	SELECT *
+	FROM users
+    WHERE username = '%s'`, username)
+	var result []models.User
+	err := pgxscan.Select(context.Background(), storage.databasePool, &result, query)
+	if err != nil {
+		storage.logger.Errorf("Failed to get users, due to err: %v\n", err)
+	}
+	return result
+}
 
 func (storage *Storage) List(departure_city string, arrival_city string, dateFrom string, dateTo string) []models.FlightsV {
 	query := fmt.Sprintf(`
@@ -65,7 +76,7 @@ func (storage *Storage) List(departure_city string, arrival_city string, dateFro
 	var result []models.FlightsV
 	err := pgxscan.Select(context.Background(), storage.databasePool, &result, query)
 	if err != nil {
-		storage.logger.Errorf("Failed to list metrics, due to err: %v\n", err)
+		storage.logger.Errorf("Failed to list list flights, due to err: %v\n", err)
 	}
 
 	return result
