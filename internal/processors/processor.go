@@ -1,8 +1,9 @@
 package processors
 
 import (
-	"time"
+	"math/rand"
 	"net/url"
+	"time"
 
 	"github.com/antikuz/demo-avia/internal/db"
 	"github.com/antikuz/demo-avia/internal/models"
@@ -50,4 +51,26 @@ func (s *StorageProcessor) GetUser(username string) models.User {
 
 func (s *StorageProcessor) GetUserFlights(username string) []models.UserFlights {
 	return s.storage.GetUserFlights(username)
+}
+
+func (s *StorageProcessor) BuyTicket(formValues url.Values) bool {
+	rand.Seed(time.Now().UnixNano())
+	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
+	book_ref := make([]rune, 6)
+	for i := range book_ref {
+		book_ref[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+
+	ticket_no := make([]rune, 13)
+	for i := range ticket_no {
+		ticket_no[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+
+	flightid := formValues["flight_id"][0]
+	passenger_name := formValues["name"][0]
+	passenger_id := formValues["passport"][0]
+	fare_conditions := formValues["class"][0]
+
+	err := s.storage.BuyTicket(string(book_ref), string(ticket_no), passenger_id, passenger_name, fare_conditions, flightid)
+	return err == nil
 }

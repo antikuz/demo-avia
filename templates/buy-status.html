@@ -25,17 +25,9 @@
             </div>
         </a>
         <br>
-        <form action="/buystatus" method="post">
-            <label for="name">Фамилия имя</label>
-            <input id="name" name="name" required>
-            <label for="passport">Паспортные данные</label>
-            <input id="passport" name="passport" required>
-            <input type="radio" id="class" name="class" value="Economy" checked>
-            <label for="html">Эконом</label>
-            <input type="radio" id="class" name="class" value="Business">
-            <label for="html">Бизнес</label>
-            <input type="hidden" name="flight_id" value="{{ .SearchResults.FlightID }}">       
-            <button class="submit" type="submit">купить</button>
-        </form>
+        <label for="name">Фамилия имя</label>
+        <input id="name" name="name" required>
+        <label for="passport">Паспортные данные</label>
+        <input id="passport" name="passport" required>
    </body>
 </html>

@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
+
 type Storage struct {
 	databasePool *pgxpool.Pool
 	logger *logging.Logger
@@ -39,6 +40,65 @@ func (storage *Storage) GetFlight(flightID string) models.FlightsV  {
 	}
 	return result[0]
 }
+
+func (storage *Storage) BuyTicket(book_ref string, ticket_no string, passenger_id string, passenger_name string, fare_conditions string, flightID string) error {
+	queryBookings := fmt.Sprintf(`
+	INSERT INTO bookings (book_ref, book_date, total_amount)
+	VALUES      ('%s', bookings.now(), 0);`, book_ref)
+	queryTickets := fmt.Sprintf(`
+	INSERT INTO tickets (ticket_no, book_ref, passenger_id, passenger_name)
+	VALUES      ('%s', '%s', '%s', '%s');`, ticket_no, book_ref, passenger_id, passenger_name)
+	queryTicketFlights := fmt.Sprintf(`
+	INSERT INTO ticket_flights (ticket_no, flight_id, fare_conditions, amount)
+	VALUES      ('%s', '%s', '%s', 0);`, ticket_no, flightID, fare_conditions)
+	storage.logger.Debug(queryBookings)
+	storage.logger.Debug(queryTickets)
+	storage.logger.Debug(queryTicketFlights)
+	ctx := context.Background()
+	transaction, err := storage.databasePool.Begin(ctx)
+	if err != nil {
+		storage.logger.Errorf("Begun transaction failed due to err: %v\n", err)
+		return err
+	}
+	
+	_, err = transaction.Exec(context.Background(), queryBookings)
+	if err != nil {
+		storage.logger.Error(err)
+		err = transaction.Rollback(context.Background())
+		if err != nil {
+			storage.logger.Errorf("Rollback failed due to err: %v\n", err)
+		}
+		return err
+	}
+
+	_, err = transaction.Exec(context.Background(), queryTickets)
+	if err != nil {
+		storage.logger.Error(err)
+		err = transaction.Rollback(context.Background())
+		if err != nil {
+			storage.logger.Errorf("Rollback failed due to err: %v\n", err)
+		}
+		return err
+	}
+
+	_, err = transaction.Exec(context.Background(), queryTicketFlights)
+	if err != nil {
+		storage.logger.Error(err)
+		err = transaction.Rollback(context.Background())
+		if err != nil {
+			storage.logger.Errorf("Rollback failed due to err: %v\n", err)
+		}
+		return err
+	}
+	err = transaction.Commit(context.Background())
+	if err != nil {
+		storage.logger.Errorf("Transaction commit failed due to err: %v\n", err)
+	}
+
+	return err
+}
+
+
 
 func (storage *Storage) GetUser(username string) []models.User  {
 	query := fmt.Sprintf(`

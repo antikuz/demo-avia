@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 	"time"
@@ -19,6 +20,7 @@ const (
 	signinURL      = "/signin"
 	userProfileURL = "/profile"
 	userURL        = "/users/:uuid"
+	buyStatusURL   = "/buystatus"
 )
 
 type handler struct {
@@ -61,6 +63,7 @@ func (h *handler) Register(router *httprouter.Router) {
 	router.POST(searchURL, h.GetFlights)
 	router.GET(signinURL, h.SignIn)
 	router.POST(signinURL, h.SignIn)
+	router.POST(buyStatusURL, h.BuyStatus)
 	router.GET(userProfileURL, h.UserProfile)
 }
 
@@ -140,6 +143,21 @@ func (h *handler) UserProfile(w http.ResponseWriter, r *http.Request, params htt
 		flights := h.processor.GetUserFlights(user)
 		if err := h.templates.ExecuteTemplate(w, "profile.html", flights); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
+}
+
+func (h *handler) BuyStatus(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	if !h.isAuthorized(w, r) {
+		http.Redirect(w, r, "/signin", http.StatusSeeOther)
+	} else {
+		r.ParseForm()
+		postFormValues := r.PostForm
+		BuySuccess := h.processor.BuyTicket(postFormValues)
+		if BuySuccess {
+			fmt.Fprintf(w, "Покупка успешная")
+		} else {
+			fmt.Fprintf(w, "Покупка неудалась")
 		}
 	}
 }
