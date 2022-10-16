@@ -35,6 +35,8 @@ func main() {
 	if err != nil {
 		logger.Fatalln(err)
 	}
+	defer db_storage.Close()
+	
 	storage := db.NewStorage(db_storage, logger)
 	processor := processors.NewStorageProcessor(storage, logger)
 

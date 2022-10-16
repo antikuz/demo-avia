@@ -27,6 +27,7 @@ func (s Session) IsExpired() bool {
 type User struct {
 	Username string
 	Password string
+	PassengerID string `db:"passenger_id"`
 }
 
 type FlightsV struct {
