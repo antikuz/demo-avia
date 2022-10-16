@@ -10,11 +10,14 @@ import (
 
 	"github.com/antikuz/demo-avia/internal/db"
 	"github.com/antikuz/demo-avia/internal/handlers"
+	"github.com/antikuz/demo-avia/internal/models"
 	"github.com/antikuz/demo-avia/internal/processors"
 	"github.com/antikuz/demo-avia/pkg/logging"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/julienschmidt/httprouter"
 )
+
+var sessions = map[string]*models.Session{}
 
 func main() {
 	logger := logging.GetLogger()
@@ -41,7 +44,7 @@ func main() {
 	}
 	logger.Debugln(templatesList)
 	templates := template.Must(template.ParseFiles(templatesList...))
-	handler := handlers.NewHandler(templates, processor, logger)
+	handler := handlers.NewHandler(templates, processor, sessions, logger)
 	router := httprouter.New()
 	router.ServeFiles("/static/*filepath", http.Dir("static"))
 	handler.Register(router)

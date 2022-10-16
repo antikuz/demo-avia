@@ -15,6 +15,15 @@ type BuyFlightID struct {
 	SearchResults FlightsV
 }
 
+type Session struct {
+	Username string
+	Expiry   time.Time
+}
+
+func (s Session) IsExpired() bool {
+	return s.Expiry.Before(time.Now())
+}
+
 type FlightsV struct {
 	FlightID int `db:"flight_id"`
 	DepartureCity  string `db:"departure_city"`

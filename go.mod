@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/georgysavva/scany v1.2.1
+	github.com/google/uuid v1.3.0
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/sirupsen/logrus v1.9.0
