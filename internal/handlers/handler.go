@@ -132,8 +132,6 @@ func (h *handler) UserProfile(w http.ResponseWriter, r *http.Request, params htt
 	}
 
 	user := h.getUser(r)
-
-
 	if err := h.templates.ExecuteTemplate(w, "profile.html", user); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

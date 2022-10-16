@@ -53,7 +53,7 @@ func (storage *Storage) GetUser(username string) []models.User  {
 	return result
 }
 
-func (storage *Storage) List(departure_city string, arrival_city string, dateFrom string, dateTo string) []models.FlightsV {
+func (storage *Storage) List(departure_city string, arrival_city string, dateFrom string, dateTo string, passengersCount string, class string) []models.FlightsV {
 	query := fmt.Sprintf(`
 	SELECT flight_id, 
 	       scheduled_departure_local, 
@@ -69,10 +69,10 @@ func (storage *Storage) List(departure_city string, arrival_city string, dateFro
 	  AND (SELECT COUNT(*) - (SELECT COUNT(*)
 		 FROM ticket_flights tf
 		 WHERE tf.flight_id = fv.flight_id
-		  AND tf.fare_conditions = 'Business')
+		  AND tf.fare_conditions = '%s')
 	FROM seats
 	WHERE aircraft_code = fv.aircraft_code 
-	AND fare_conditions = 'Business') > 0;`,departure_city, arrival_city, dateFrom, dateTo)
+	AND fare_conditions = 'Business') >= %s`,departure_city, arrival_city, dateFrom, dateTo, class, passengersCount)
 	var result []models.FlightsV
 	err := pgxscan.Select(context.Background(), storage.databasePool, &result, query)
 	if err != nil {
