@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 
 <html>
-{{template "head"}}
+{{ template "head" }}
    <body>
+{{ template "header" .}}
+   Вход в личный кабинет
     <form action="/signin" method="post">
-        <ul>
-            <li>
-                <input name="username" required>
-                <input name="password" required>
-                <button class="submit" type="submit">войти</button>
-            </li>
-        </ul>
+        <input name="username" required>
+        <input name="password" required>
+        <button class="submit" type="submit">войти</button>
    </body>
 </html>

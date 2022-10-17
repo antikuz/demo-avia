@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 
 <html>
-{{template "head"}}
+{{ template "head" }}
    <body>
-        {{template "header" .}}
+{{ template "header" .}}
+{{ template "search_header" .}}
         <br>
         {{range $line := .SearchResults}}
         <a href="/buy/{{ $line.FlightID }}" style="color:inherit">

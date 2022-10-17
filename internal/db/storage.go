@@ -51,9 +51,6 @@ func (storage *Storage) BuyTicket(book_ref string, ticket_no string, passenger_i
 	queryTicketFlights := fmt.Sprintf(`
 	INSERT INTO ticket_flights (ticket_no, flight_id, fare_conditions, amount)
 	VALUES      ('%s', '%s', '%s', 0);`, ticket_no, flightID, fare_conditions)
-	storage.logger.Debug(queryBookings)
-	storage.logger.Debug(queryTickets)
-	storage.logger.Debug(queryTicketFlights)
 	ctx := context.Background()
 	transaction, err := storage.databasePool.Begin(ctx)
 	if err != nil {
@@ -98,8 +95,6 @@ func (storage *Storage) BuyTicket(book_ref string, ticket_no string, passenger_i
 	return err
 }
 
-
-
 func (storage *Storage) GetUser(username string) []models.User  {
 	query := fmt.Sprintf(`
 	SELECT *
@@ -113,6 +108,34 @@ func (storage *Storage) GetUser(username string) []models.User  {
 	return result
 }
 
+func (storage *Storage) RegisterUser(username string, password string, passport string) error {
+	queryRegister := fmt.Sprintf(`
+	INSERT INTO users (username, password, passenger_id)
+	VALUES ('%s', '%s', '%s');`, username, password, passport)
+	ctx := context.Background()
+	transaction, err := storage.databasePool.Begin(ctx)
+	if err != nil {
+		storage.logger.Errorf("Begun transaction failed due to err: %v\n", err)
+		return err
+	}
+	
+	_, err = transaction.Exec(context.Background(), queryRegister)
+	if err != nil {
+		storage.logger.Error(err)
+		err = transaction.Rollback(context.Background())
+		if err != nil {
+			storage.logger.Errorf("Rollback failed due to err: %v\n", err)
+		}
+		return err
+	}
+
+	err = transaction.Commit(context.Background())
+	if err != nil {
+		storage.logger.Errorf("Transaction commit failed due to err: %v\n", err)
+	}
+
+	return err
+}
 func (storage *Storage) GetUserFlights(username string) []models.UserFlights {
 	query := fmt.Sprintf(`
 	SELECT	f.scheduled_departure,

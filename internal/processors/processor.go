@@ -53,6 +53,14 @@ func (s *StorageProcessor) GetUserFlights(username string) []models.UserFlights 
 	return s.storage.GetUserFlights(username)
 }
 
+func (s *StorageProcessor) RegisterUser(formValues url.Values) bool {
+	username := formValues["username"][0]
+	password := formValues["password"][0]
+	passport := formValues["passport"][0]
+	err := s.storage.RegisterUser(username, password, passport)
+	return err == nil
+}
+
 func (s *StorageProcessor) BuyTicket(formValues url.Values) bool {
 	rand.Seed(time.Now().UnixNano())
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")

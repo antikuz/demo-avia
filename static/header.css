@@ -2,20 +2,36 @@ body {font: 14px/21px "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", san
 .search_form h2 {font-family:Georgia, Times, "Times New Roman", serif;}
 .form_hint, .required_notification {font-size: 11px;}
 
-.search_form ul {
+.header ul {
     list-style-type:none;
     list-style-position:outside;
     margin:0px;
     padding:0px;
     border-bottom:1px solid #777;
 }
+
+.header a {
+    font-size: large;
+    color:inherit;
+    line-height: 1em;
+    display: inline-block;
+    text-decoration: none;
+    padding: 10px;
+    margin: 10px;
+}
+
+.search_form ul {
+    list-style-type:none;
+    list-style-position:outside;
+    margin:0px;
+    padding:0px;
+    border-bottom:2px solid #777;
+}
 .search_form li{
     padding:12px;
     position:relative;
 }
-.search_form li:first-child {
-    border-bottom:1px solid #777;
-}
+
 .search_form h2 {
     margin:0;
     display: inline;

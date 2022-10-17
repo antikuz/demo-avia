@@ -1,34 +1,9 @@
 {{define "header"}}
-    <form action="/search" method="post" class="search_form">
-        <ul>
-            <li>
-                <input name="departure" placeholder="Откуда" list="cities" oninput="completeDataList(event, 'cities')" onfocus="" onsearch="ClearDataList('cities')" autocomplete=off value="{{if .SearchValues.departure}}{{ index .SearchValues.departure 0 }}{{end}}" required>
-                <input name="arrival" placeholder="Куда" list="cities2" oninput="completeDataList(event, 'cities2')" onfocus="" onsearch="ClearDataList('cities2')" autocomplete=off value="{{if .SearchValues.arrival}}{{ index .SearchValues.arrival 0 }}{{end}}" required>
-                <input id="date" name="date" placeholder="Когда" type="date" value="{{if .SearchValues.date}}{{ index .SearchValues.date 0 }}{{end}}" required>
-                <label for="passengers_count">Пассажиры</label>
-                <input type="number" id="passengers_count" name="passengers_count" value="{{if .SearchValues.passengers_count}}{{ index .SearchValues.passengers_count 0 }}{{else}}1{{end}}" min="1" max="9">
-                {{ if and (.SearchValues.class ) (eq (index .SearchValues.class 0) "Business") }}
-                    <input type="radio" id="class" name="class" value="Econom">
-                    <label for="html">Эконом</label>
-                    <input type="radio" id="class" name="class" value="Business" checked>
-                    <label for="html">Бизнес</label>
-                {{ else }}
-                    <input type="radio" id="class" name="class" value="Econom" checked>
-                    <label for="html">Эконом</label>
-                    <input type="radio" id="class" name="class" value="Business">
-                    <label for="html">Бизнес</label>
-                {{ end }}
-                {{ if .SearchValues.baggage }}
-                    <input type="checkbox" id="baggage" name="baggage" checked>
-                    <label for="baggage">Багаж</label>
-                {{ else }}
-                    <input type="checkbox" id="baggage" name="baggage">
-                    <label for="baggage">Багаж</label>
-                {{ end }}
-                <button class="submit" type="submit">Найти билеты</button>
-            </li>
-        </ul>
-    <datalist id="cities"></datalist>
-    <datalist id="cities2"></datalist>
-    </form>
+<div class="header">
+    <ul>
+        <a href="/search">Поиск билетов</a>
+        <a href="/profile">Личный кабинет</a>
+        {{ if .auth }}<a href="/signout" style="float:right">Выйти</a>{{ else }}<a href="/signin" style="float:right">Войти</a>{{ end }}
+    </ul>
+<div>
 {{end}}

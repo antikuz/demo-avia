@@ -19,8 +19,8 @@ const (
 	buyURL         = "/buy/:id"
 	signinURL      = "/signin"
 	userProfileURL = "/profile"
-	userURL        = "/users/:uuid"
 	buyStatusURL   = "/buystatus"
+	registerURL    = "/register"
 )
 
 type handler struct {
@@ -41,8 +41,11 @@ func NewHandler(templates *template.Template, processor *processors.StorageProce
 
 func (h *handler) isAuthorized(w http.ResponseWriter, r *http.Request) bool {
 	token, err := r.Cookie("session_token")
+	if err != nil {
+		return false
+	}
 	_, ok := h.sessions[token.Value]
-	if err != nil || !ok {
+	if !ok {
 		return false
 	}
 
@@ -64,11 +67,19 @@ func (h *handler) Register(router *httprouter.Router) {
 	router.GET(signinURL, h.SignIn)
 	router.POST(signinURL, h.SignIn)
 	router.POST(buyStatusURL, h.BuyStatus)
+	router.GET(registerURL, h.RegisterUser)
+	router.POST(registerURL, h.RegisterUser)
 	router.GET(userProfileURL, h.UserProfile)
 }
 
 func (h *handler) GetMain(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	if err := h.templates.ExecuteTemplate(w, "main.html", nil); err != nil {
+	templateValues := map[string]bool{
+		"auth": false,
+	}
+	if h.isAuthorized(w, r) {
+		templateValues["auth"] = true
+	}
+	if err := h.templates.ExecuteTemplate(w, "main.html", templateValues); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -132,7 +143,6 @@ func (h *handler) SignIn(w http.ResponseWriter, r *http.Request, params httprout
 
 		http.Redirect(w, r, "/profile", http.StatusSeeOther)
 	}
-
 }
 
 func (h *handler) UserProfile(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
@@ -159,5 +169,36 @@ func (h *handler) BuyStatus(w http.ResponseWriter, r *http.Request, params httpr
 		} else {
 			fmt.Fprintf(w, "Покупка неудалась")
 		}
+	}
+}
+
+func (h *handler) RegisterUser(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	if r.Method == "GET" {
+		if err := h.templates.ExecuteTemplate(w, "register.html", nil); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	} else {
+		r.ParseForm()
+		formValues := r.PostForm
+
+		userRegistered := h.processor.RegisterUser(formValues)
+		if !userRegistered {
+			return
+		}
+		sessionToken := uuid.NewString()
+		expiresAt := time.Now().Add(3600 * time.Second)
+
+		h.sessions[sessionToken] = &models.Session{
+			Username: formValues["username"][0],
+			Expiry:   expiresAt,
+		}
+
+		http.SetCookie(w, &http.Cookie{
+			Name:    "session_token",
+			Value:   sessionToken,
+			Expires: expiresAt,
+		})
+
+		http.Redirect(w, r, "/profile", http.StatusSeeOther)
 	}
 }
