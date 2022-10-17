@@ -18,6 +18,7 @@ const (
 	searchURL      = "/search"
 	buyURL         = "/buy/:id"
 	signinURL      = "/signin"
+	signoutURL     = "/signout"
 	userProfileURL = "/profile"
 	buyStatusURL   = "/buystatus"
 	registerURL    = "/register"
@@ -62,6 +63,7 @@ func (h *handler) Register(router *httprouter.Router) {
 	router.GET(searchURL, h.GetFlights)
 	router.POST(searchURL, h.GetFlights)
 	router.GET(signinURL, h.SignIn)
+	router.GET(signoutURL, h.SignOut)
 	router.POST(signinURL, h.SignIn)
 	router.POST(buyStatusURL, h.BuyStatus)
 	router.GET(registerURL, h.RegisterUser)
@@ -156,6 +158,26 @@ func (h *handler) SignIn(w http.ResponseWriter, r *http.Request, params httprout
 
 		http.Redirect(w, r, "/profile", http.StatusSeeOther)
 	}
+}
+
+func (h *handler) SignOut(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	c, err := r.Cookie("session_token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	sessionToken := c.Value
+	delete(h.sessions, sessionToken)
+	http.SetCookie(w, &http.Cookie{
+		Name:    "session_token",
+		Value:   "",
+		Expires: time.Now(),
+	})
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (h *handler) UserProfile(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
