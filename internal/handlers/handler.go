@@ -23,7 +23,7 @@ const (
 	buyStatusURL    = "/buystatus"
 	registerURL     = "/register"
 	editTicketURL   = "/edit/:id"
-	removeTicketURL = "/remove/:id"
+	removeTicketURL = "/remove/:flightid/:ticketno/:bookref"
 )
 
 type handler struct {
@@ -72,6 +72,7 @@ func (h *handler) Register(router *httprouter.Router) {
 	router.POST(registerURL, h.RegisterUser)
 	router.GET(userProfileURL, h.UserProfile)
 	router.GET(editTicketURL, h.EditTicket)
+	router.GET(removeTicketURL, h.RemoveTicket)
 }
 
 func (h *handler) GetMain(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
@@ -81,7 +82,6 @@ func (h *handler) GetMain(w http.ResponseWriter, r *http.Request, params httprou
 	if h.isAuthorized(w, r) {
 		templateValues["Auth"] = true
 	}
-	h.logger.Debug(templateValues)
 	if err := h.templates.ExecuteTemplate(w, "main.html", templateValues); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -147,6 +147,20 @@ func (h *handler) EditTicket(w http.ResponseWriter, r *http.Request, params http
 		}
 		if err := h.templates.ExecuteTemplate(w, "edit-ticket.html", result); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
+}
+
+func (h *handler) RemoveTicket(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	if !h.isAuthorized(w, r) {
+		http.Redirect(w, r, "/signin", http.StatusSeeOther)
+	} else {
+		flight_id := params.ByName("flightid")
+		ticketno := params.ByName("ticketno")
+		bookref := params.ByName("bookref")
+		removeSuccess := h.processor.RemoveTicket(flight_id, ticketno, bookref)
+		if removeSuccess {
+			http.Redirect(w, r, "/profile", http.StatusSeeOther)
 		}
 	}
 }

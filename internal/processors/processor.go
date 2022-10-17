@@ -86,3 +86,8 @@ func (s *StorageProcessor) BuyTicket(formValues url.Values) bool {
 	err := s.storage.BuyTicket(string(book_ref), string(ticket_no), passenger_id, passenger_name, fare_conditions, flightid)
 	return err == nil
 }
+
+func (s *StorageProcessor) RemoveTicket(flight_id string, ticketno string, bookref string) bool {
+	err := s.storage.RemoveTicket(flight_id, ticketno, bookref)
+	return err == nil
+}

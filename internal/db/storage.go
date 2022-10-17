@@ -95,6 +95,61 @@ func (storage *Storage) BuyTicket(book_ref string, ticket_no string, passenger_i
 	return err
 }
 
+func (storage *Storage) RemoveTicket(flight_id string, ticketno string, bookref string) error {
+	queryBoardingPass := fmt.Sprintf(`
+	DELETE FROM boarding_passes
+	WHERE  ticket_no = '%s' AND flight_id = '%s';`, ticketno, flight_id)
+	queryTickets := fmt.Sprintf(`
+	DELETE FROM tickets
+	WHERE  ticket_no = '%s' AND book_ref = '%s';`, ticketno, bookref)
+	queryTicketFlights := fmt.Sprintf(`
+	DELETE FROM ticket_flights
+	WHERE  ticket_no = '%s' AND flight_id = '%s';`, ticketno, flight_id)
+	ctx := context.Background()
+	transaction, err := storage.databasePool.Begin(ctx)
+	if err != nil {
+		storage.logger.Errorf("Begun transaction failed due to err: %v\n", err)
+		return err
+	}
+	
+	_, err = transaction.Exec(context.Background(), queryBoardingPass)
+	if err != nil {
+		storage.logger.Error(err)
+		err = transaction.Rollback(context.Background())
+		if err != nil {
+			storage.logger.Errorf("Rollback failed due to err: %v\n", err)
+		}
+		return err
+	}
+	_, err = transaction.Exec(context.Background(), queryTicketFlights)
+	if err != nil {
+		storage.logger.Error(err)
+		err = transaction.Rollback(context.Background())
+		if err != nil {
+			storage.logger.Errorf("Rollback failed due to err: %v\n", err)
+		}
+		return err
+	}
+	
+	_, err = transaction.Exec(context.Background(), queryTickets)
+	if err != nil {
+		storage.logger.Error(err)
+		err = transaction.Rollback(context.Background())
+		if err != nil {
+			storage.logger.Errorf("Rollback failed due to err: %v\n", err)
+		}
+		return err
+	}
+
+	err = transaction.Commit(context.Background())
+	if err != nil {
+		storage.logger.Errorf("Transaction commit failed due to err: %v\n", err)
+	}
+
+	return err
+}
+
+
 func (storage *Storage) GetUser(username string) []models.User  {
 	query := fmt.Sprintf(`
 	SELECT *
@@ -151,7 +206,6 @@ func (storage *Storage) GetUserFlights(username string) []models.UserFlights {
 	WHERE    u.username = '%s'
 	ORDER BY f.scheduled_departure;`, username)
 	var result []models.UserFlights
-	storage.logger.Debugf("%+v", result)
 	err := pgxscan.Select(context.Background(), storage.databasePool, &result, query)
 	if err != nil {
 		storage.logger.Errorf("Failed to get GetUserFlights, due to err: %v\n", err)
@@ -165,16 +219,17 @@ func (storage *Storage) EditUserFlights(username string, flight_id string) []mod
 			f.departure_city || ' (' || f.departure_airport || ')' AS departure,
 			f.arrival_city || ' (' || f.arrival_airport || ')' AS arrival,
 			tf.flight_id,
-			tf.ticket_no
+			tf.ticket_no,
+			b.book_ref
 	FROM ticket_flights tf
 	JOIN tickets t ON t.ticket_no = tf.ticket_no
 	JOIN users u ON t.passenger_id = u.passenger_id
 	JOIN flights_v f ON tf.flight_id = f.flight_id
+	JOIN bookings b ON b.book_ref = t.book_ref
 	WHERE    u.username = '%s'
 	  AND	 tf.flight_id = '%s'
 	ORDER BY f.scheduled_departure;`, username, flight_id)
 	var result []models.UserFlights
-	storage.logger.Debugf("%+v", result)
 	err := pgxscan.Select(context.Background(), storage.databasePool, &result, query)
 	if err != nil {
 		storage.logger.Errorf("Failed to get EditUserFlights, due to err: %v\n", err)
