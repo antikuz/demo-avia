@@ -45,11 +45,7 @@ func (h *handler) isAuthorized(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	_, ok := h.sessions[token.Value]
-	if !ok {
-		return false
-	}
-
-	return true
+	return ok
 }
 
 func (h *handler) getUser(r *http.Request) string {
@@ -63,6 +59,7 @@ func (h *handler) getUser(r *http.Request) string {
 func (h *handler) Register(router *httprouter.Router) {
 	router.GET(rootURL, h.GetMain)
 	router.GET(buyURL, h.BuyTicket)
+	router.GET(searchURL, h.GetFlights)
 	router.POST(searchURL, h.GetFlights)
 	router.GET(signinURL, h.SignIn)
 	router.POST(signinURL, h.SignIn)
@@ -74,25 +71,40 @@ func (h *handler) Register(router *httprouter.Router) {
 
 func (h *handler) GetMain(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	templateValues := map[string]bool{
-		"auth": false,
+		"Auth": false,
 	}
 	if h.isAuthorized(w, r) {
-		templateValues["auth"] = true
+		templateValues["Auth"] = true
 	}
+	h.logger.Debug(templateValues)
 	if err := h.templates.ExecuteTemplate(w, "main.html", templateValues); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
 func (h *handler) GetFlights(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	r.ParseForm()
-	postFormValues := r.PostForm
-	result := models.SearchResult{
-		SearchValues:  postFormValues,
-		SearchResults: h.processor.List(postFormValues),
+	auth := false
+	if h.isAuthorized(w, r) {
+		auth = true
 	}
-	if err := h.templates.ExecuteTemplate(w, "search.html", result); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if r.Method == "GET" {
+		templateValues := map[string]bool{
+			"Auth": auth,
+		}
+		if err := h.templates.ExecuteTemplate(w, "search.html", templateValues); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	} else {
+		r.ParseForm()
+		postFormValues := r.PostForm
+		result := models.SearchResult{
+			SearchValues:  postFormValues,
+			SearchResults: h.processor.List(postFormValues),
+			Auth:          auth,
+		}
+		if err := h.templates.ExecuteTemplate(w, "search.html", result); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	}
 }
 
@@ -106,6 +118,7 @@ func (h *handler) BuyTicket(w http.ResponseWriter, r *http.Request, params httpr
 		result := models.BuyFlightID{
 			SearchValues:  postFormValues,
 			SearchResults: h.processor.GetFlight(id),
+			Auth:          true,
 		}
 		if err := h.templates.ExecuteTemplate(w, "buy-ticket.html", result); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -151,7 +164,14 @@ func (h *handler) UserProfile(w http.ResponseWriter, r *http.Request, params htt
 	} else {
 		user := h.getUser(r)
 		flights := h.processor.GetUserFlights(user)
-		if err := h.templates.ExecuteTemplate(w, "profile.html", flights); err != nil {
+		result := struct{
+			Auth    bool
+			Flights []models.UserFlights
+		}{
+			Auth: true,
+			Flights: flights,
+		}
+		if err := h.templates.ExecuteTemplate(w, "profile.html", result); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	}

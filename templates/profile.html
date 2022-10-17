@@ -2,10 +2,10 @@
 <html>
 {{template "head"}}
    <body>
-{{template "header"}}
+{{template "header" .}}
       Ваши предстоящие полеты
       <br>
-      {{range $line := .}}
+      {{range $line := .Flights}}
         <a href="/edit/{{ $line.FlightID }}" style="color:inherit">
             <div class="div-table">
                 <div class="div-table-row">

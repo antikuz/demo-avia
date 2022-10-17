@@ -3,7 +3,7 @@
     <ul>
         <a href="/search">Поиск билетов</a>
         <a href="/profile">Личный кабинет</a>
-        {{ if .auth }}<a href="/signout" style="float:right">Выйти</a>{{ else }}<a href="/signin" style="float:right">Войти</a>{{ end }}
+        {{ if .Auth }}<a href="/signout" style="float:right">Выйти</a>{{ else }}<a href="/signin" style="float:right">Войти</a>{{ end }}
     </ul>
 <div>
 {{end}}
