@@ -14,14 +14,16 @@ import (
 )
 
 const (
-	rootURL        = "/"
-	searchURL      = "/search"
-	buyURL         = "/buy/:id"
-	signinURL      = "/signin"
-	signoutURL     = "/signout"
-	userProfileURL = "/profile"
-	buyStatusURL   = "/buystatus"
-	registerURL    = "/register"
+	rootURL         = "/"
+	searchURL       = "/search"
+	buyURL          = "/buy/:id"
+	signinURL       = "/signin"
+	signoutURL      = "/signout"
+	userProfileURL  = "/profile"
+	buyStatusURL    = "/buystatus"
+	registerURL     = "/register"
+	editTicketURL   = "/edit/:id"
+	removeTicketURL = "/remove/:id"
 )
 
 type handler struct {
@@ -69,6 +71,7 @@ func (h *handler) Register(router *httprouter.Router) {
 	router.GET(registerURL, h.RegisterUser)
 	router.POST(registerURL, h.RegisterUser)
 	router.GET(userProfileURL, h.UserProfile)
+	router.GET(editTicketURL, h.EditTicket)
 }
 
 func (h *handler) GetMain(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
@@ -123,6 +126,26 @@ func (h *handler) BuyTicket(w http.ResponseWriter, r *http.Request, params httpr
 			Auth:          true,
 		}
 		if err := h.templates.ExecuteTemplate(w, "buy-ticket.html", result); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
+}
+
+func (h *handler) EditTicket(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	if !h.isAuthorized(w, r) {
+		http.Redirect(w, r, "/signin", http.StatusSeeOther)
+	} else {
+		user := h.getUser(r)
+		flight_id := params.ByName("id")
+		flight := h.processor.EditUserFlights(user, flight_id)[0]
+		result := struct {
+			Auth    bool
+			Flight models.UserFlights
+		}{
+			Auth:    true,
+			Flight: flight,
+		}
+		if err := h.templates.ExecuteTemplate(w, "edit-ticket.html", result); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	}
@@ -186,11 +209,11 @@ func (h *handler) UserProfile(w http.ResponseWriter, r *http.Request, params htt
 	} else {
 		user := h.getUser(r)
 		flights := h.processor.GetUserFlights(user)
-		result := struct{
+		result := struct {
 			Auth    bool
 			Flights []models.UserFlights
 		}{
-			Auth: true,
+			Auth:    true,
 			Flights: flights,
 		}
 		if err := h.templates.ExecuteTemplate(w, "profile.html", result); err != nil {

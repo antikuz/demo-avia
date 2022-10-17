@@ -19,6 +19,7 @@ type BuyFlightID struct {
 
 type UserFlights struct {
 	FlightID      int       `db:"flight_id"`
+	TicketNO      string    `db:"ticket_no"`
 	DepartureCity string    `db:"departure"`
 	ArrivalCity   string    `db:"arrival"`
 	DepartureDate time.Time `db:"scheduled_departure"`

@@ -53,6 +53,10 @@ func (s *StorageProcessor) GetUserFlights(username string) []models.UserFlights 
 	return s.storage.GetUserFlights(username)
 }
 
+func (s *StorageProcessor) EditUserFlights(username string, flight_id string) []models.UserFlights {
+	return s.storage.EditUserFlights(username, flight_id)
+}
+
 func (s *StorageProcessor) RegisterUser(formValues url.Values) bool {
 	username := formValues["username"][0]
 	password := formValues["password"][0]

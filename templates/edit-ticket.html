@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+{{template "head"}}
+   <body>
+{{template "header" .}}
+      Редактирование билета
+      <br>
+        <div class="div-table">
+            <div class="div-table-row">
+                <div class="div-table-col">&nbsp;</div>
+                <div class="div-table-col">&nbsp;</div>
+                <div class="div-table-col">&nbsp;</div>
+            </div>
+            <div class="div-table-row">
+                <div class="div-table-col">{{ .Flight.DepartureDate.Format "2006-01-02" }}</div>
+                <div class="div-table-col">{{ .Flight.DepartureCity }}</div>
+                <div class="div-table-col">{{ .Flight.ArrivalCity }}</div>
+            </div>
+            <div class="div-table-row">
+                <div class="div-table-col">&nbsp;</div>
+                <div class="div-table-col">&nbsp;</div>
+                <div class="div-table-col">&nbsp;</div>
+            </div>
+        </div>
+        <a href="/remove/{{ .Flight.FlightID }}/{{ .Flight.TicketNO }}">Отказаться от билета</a>
+        </form>   
+   </body>
+</html>

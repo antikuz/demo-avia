@@ -136,12 +136,14 @@ func (storage *Storage) RegisterUser(username string, password string, passport 
 
 	return err
 }
+
 func (storage *Storage) GetUserFlights(username string) []models.UserFlights {
 	query := fmt.Sprintf(`
 	SELECT	f.scheduled_departure,
 			f.departure_city || ' (' || f.departure_airport || ')' AS departure,
 			f.arrival_city || ' (' || f.arrival_airport || ')' AS arrival,
-			tf.flight_id
+			tf.flight_id,
+			tf.ticket_no
 	FROM ticket_flights tf
 	JOIN tickets t ON t.ticket_no = tf.ticket_no
 	JOIN users u ON t.passenger_id = u.passenger_id
@@ -152,10 +154,34 @@ func (storage *Storage) GetUserFlights(username string) []models.UserFlights {
 	storage.logger.Debugf("%+v", result)
 	err := pgxscan.Select(context.Background(), storage.databasePool, &result, query)
 	if err != nil {
-		storage.logger.Errorf("Failed to get users, due to err: %v\n", err)
+		storage.logger.Errorf("Failed to get GetUserFlights, due to err: %v\n", err)
 	}
 	return result
 }
+
+func (storage *Storage) EditUserFlights(username string, flight_id string) []models.UserFlights {
+	query := fmt.Sprintf(`
+	SELECT	f.scheduled_departure,
+			f.departure_city || ' (' || f.departure_airport || ')' AS departure,
+			f.arrival_city || ' (' || f.arrival_airport || ')' AS arrival,
+			tf.flight_id,
+			tf.ticket_no
+	FROM ticket_flights tf
+	JOIN tickets t ON t.ticket_no = tf.ticket_no
+	JOIN users u ON t.passenger_id = u.passenger_id
+	JOIN flights_v f ON tf.flight_id = f.flight_id
+	WHERE    u.username = '%s'
+	  AND	 tf.flight_id = '%s'
+	ORDER BY f.scheduled_departure;`, username, flight_id)
+	var result []models.UserFlights
+	storage.logger.Debugf("%+v", result)
+	err := pgxscan.Select(context.Background(), storage.databasePool, &result, query)
+	if err != nil {
+		storage.logger.Errorf("Failed to get EditUserFlights, due to err: %v\n", err)
+	}
+	return result
+}
+
 
 func (storage *Storage) List(departure_city string, arrival_city string, dateFrom string, dateTo string, passengersCount string, class string) []models.FlightsV {
 	query := fmt.Sprintf(`
