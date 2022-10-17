@@ -25,7 +25,7 @@ func main() {
 	
 	// For testing purpose leave cred here
 	user := "postgres"
-	password := "chunga"
+	password := "postgres"
 	host := "localhost"
 	port := "5432"
 	dbname := "demo"
